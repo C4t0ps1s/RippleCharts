@@ -173,7 +173,7 @@ var ripl = new Vue({
 				ripl.bids= ripl.bookBid = null;
 				ripl.bids = offers;
 				ripl.filter_offers();
-				document.title = "XRP / " + ripl.currentPrice(3) + " $";
+				document.title = ripl.currentPrice(3) + "$ / "+ripl.currentFund()+"$";
 			});
 			this.bookAsk = this.remote.createOrderBook({
 				currency_gets: "USD", issuer_gets:"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
