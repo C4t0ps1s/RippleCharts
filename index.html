@@ -42,6 +42,7 @@ input {
 <script src="lib/ripple-1.2.3-min.js"></script>
 <script src="https://unpkg.com/vue@2.1.10/dist/vue.js" integrity="sha384-EM4rkSrR2j2ZpSvTwYm4oqXcfANxUbR3whO+XcSdJ7t0N7+AdqKJ9jgZZwDbPT5R" crossorigin="anonymous"></script>
 <title>RippleCharts</title>
+<link rel="icon" href="favicon.ico" />
 </head>
 <body>
 <script>
@@ -54,10 +55,10 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 		<br/>
 		<p>USD {{ num(balance.usd, 2) }} | XRP {{ num(balance.xrp/1000000, 2) }} ({{ num(balance.xrp/1000000/(asks[0].TakerPays/asks[0].TakerGets.value/1000000), 0)}})</p>
 		<p>
-		{{ num(sum(balance.usd, balance.xrp/1000000/(asks[0].TakerPays/asks[0].TakerGets.value/1000000)),2) }} $
+		{{ currentFund() }} $
 		</p>
 		<p><h3>
-		Price: {{ avg(bids[0].TakerPays.value * 1000000/bids[0].TakerGets , asks[0].TakerGets.value * 1000000/asks[0].TakerPays) }} $
+		Current XRP price: {{ currentPrice(5) }} $
 		</h3></p>
 	</center>
 	<div class="row" v-bind:style="'display: ' + $data.offers_ready" v-cloak>
@@ -146,9 +147,17 @@ var ripl = new Vue({
 		sum : function(n1, n2) {
 			return parseInt(n1) + parseInt(n2);
 		},
-		avg : function(n1, n2) {
-			res = (parseFloat(n1) + parseFloat(n2)) / 2;
-			return res.toFixed(5).toString();
+		currentPrice: function(dec) {
+			f1 = parseFloat(this.bids[0].TakerPays.value * 1000000/this.bids[0].TakerGets)
+			f2 = parseFloat(this.asks[0].TakerGets.value * 1000000/this.asks[0].TakerPays)
+			res = (f1 + f2) / 2;
+			return res.toFixed(dec).toString();
+		},
+		currentFund: function() {
+			f1 = parseFloat(this.balance.usd)
+			f2 = parseFloat(this.balance.xrp/1000000/(this.asks[0].TakerPays/this.asks[0].TakerGets.value/1000000))
+			res = f1 + f2
+			return res.toFixed(2).toString();
 		},
 		capitalize: function(str) {
 			return str.charAt(0).toUpperCase() + str.slice(1);
@@ -164,6 +173,7 @@ var ripl = new Vue({
 				ripl.bids= ripl.bookBid = null;
 				ripl.bids = offers;
 				ripl.filter_offers();
+				document.title = "XRP / " + ripl.currentPrice(3) + " $";
 			});
 			this.bookAsk = this.remote.createOrderBook({
 				currency_gets: "USD", issuer_gets:"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
