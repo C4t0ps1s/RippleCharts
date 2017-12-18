@@ -50,20 +50,19 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 </script>
 <div id="ripl" class="container" v-cloak>
 	<center>
-		<h4 v-on:click="getBalance()">{{ $data.state }}</h4>
+		<h4 v-on:click="getBalance()" v-bind:style="'color:' + (state == 'Online'? 'rgb(158, 241, 92)': 'rgb(230, 17, 53)')">{{ $data.state }}</h4>
 		<input type="text" v-model="address"/>
 		<br/>
-		<p>USD {{ num(balance.usd, 2) }} | XRP {{ num(balance.xrp/1000000, 2) }} ({{ num(balance.xrp/1000000/(asks[0].TakerPays/asks[0].TakerGets.value/1000000), 0)}})</p>
-		<p>
-		{{ currentFund() }} $
-		</p>
-		<p><h3>
-		Current XRP price: {{ currentPrice(5) }} $
-		</h3></p>
+		<p><img src="img/dollar.png"></> {{ num(balance.usd, 2) }} | <img src="img/ripple.png"></> {{ num(balance.xrp/1000000, 2) }}</p>
+		
+		<p><h3>{{ num(currentFund(), 2) }} <img src="img/dollar.png"></></h3></p>
+		
+		<p><h4><img src="img/ripple.png"></> = {{ currentPrice(5) }} <img src="img/dollar.png"></></h4></p>
+		
 	</center>
 	<div class="row" v-bind:style="'display: ' + $data.offers_ready" v-cloak>
 		<div class="col-6">
-			<center><h3>Bids - Sell</h3></center>
+			<center><h3 style="color: rgb(230, 17, 53);">Bids - Sell</h3></center>
 			<table style="border-collapse: collapse">
 			<tr><th>Address</th><th>Volume</th><th>Price</th></tr>
 			<tr v-for="offer in bids">
@@ -83,7 +82,7 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 		<div class="col-6">
 			<table style="border-collapse: collapse">
 			<tr><th>Price</th><th>Volume</th><th>Address</th></tr>
-			<center><h3>Asks - Buy</h3></center>
+			<center><h3 style="color: rgb(158, 241, 92);">Asks - Buy</h3></center>
 			<tr v-for="offer in asks">
 				<template v-if="offer.isMine">
 				<td class="highlight">{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>
@@ -153,6 +152,11 @@ var ripl = new Vue({
 			res = (f1 + f2) / 2;
 			return res.toFixed(dec).toString();
 		},
+		
+		currentPrice_bittstamp: function(){
+			price = $.get("")
+		},
+		
 		currentFund: function() {
 			f1 = parseFloat(this.balance.usd)
 			f2 = parseFloat(this.balance.xrp/1000000/(this.asks[0].TakerPays/this.asks[0].TakerGets.value/1000000))
