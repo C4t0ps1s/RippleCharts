@@ -61,42 +61,45 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 		
 	</center>
 	<div class="row" v-bind:style="'display: ' + $data.offers_ready" v-cloak>
+	<div class="col-6">
+			<table style="border-collapse: collapse">
+			<tr><th>Price</th><th>Volume</th><th>Address</th></tr>
+			<center><h3 style="color: rgb(158, 241, 92);">Asks - Buy</h3></center>
+			<tr v-for="offer in asks">
+				<template v-if="offer.isMine">
+				<td class="highlight" v-bind:style="'color:' + stringToColour(offer.Account)">{{offer.Account }}</td>
+				<td class="highlight">{{ num(offer.TakerGets.value,0) }}</td>
+				<td class="highlight">{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>
+				</template>
+				<template v-else>
+				<td v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)">{{offer.Account }}</td>
+				<td>{{ num(offer.TakerGets.value,0) }}</td>
+				<td>{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>	
+				</template>
+			</tr>
+			</table>
+		</div>
 		<div class="col-6">
 			<center><h3 style="color: rgb(230, 17, 53);">Bids - Sell</h3></center>
 			<table style="border-collapse: collapse">
 			<tr><th>Address</th><th>Volume</th><th>Price</th></tr>
 			<tr v-for="offer in bids">
 				<template v-if="offer.isMine">
-				<td class="highlight" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)" >{{offer.Account}}</td>
-				<td class="highlight">{{ num(offer.TakerPays.value, 0) }}</td>
 				<td class="highlight">{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
+				<td class="highlight">{{ num(offer.TakerPays.value, 0) }}</td>
+				<td class="highlight" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)" >{{offer.Account}}</td>
 				</template>
 				<template v-else>
-				<td v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)"> {{ offer.Account }}</td>
-				<td>{{ num(offer.TakerPays.value,0) }}</td>
 				<td>{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
+				<td>{{ num(offer.TakerPays.value,0) }}</td>
+				<td v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)"> {{ offer.Account }}</td>
+				
+				
 				</template>
 			</tr>
 			</table>
 		</div>
-		<div class="col-6">
-			<table style="border-collapse: collapse">
-			<tr><th>Price</th><th>Volume</th><th>Address</th></tr>
-			<center><h3 style="color: rgb(158, 241, 92);">Asks - Buy</h3></center>
-			<tr v-for="offer in asks">
-				<template v-if="offer.isMine">
-				<td class="highlight">{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>
-				<td class="highlight">{{ num(offer.TakerGets.value,0) }}</td>
-				<td class="highlight" v-bind:style="'color:' + stringToColour(offer.Account)">{{offer.Account }}</td>
-				</template>
-				<template v-else>
-				<td>{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>
-				<td>{{ num(offer.TakerGets.value,0) }}</td>
-				<td v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)">{{offer.Account }}</td>
-				</template>
-			</tr>
-			</table>
-		</div>
+		
 
 	</div>
 </div>
