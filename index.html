@@ -63,7 +63,7 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 	<div class="row" v-bind:style="'display: ' + $data.offers_ready" v-cloak>
 	<div class="col-6">
 			<table style="border-collapse: collapse">
-			<tr><th>Price</th><th>Volume</th><th>Address</th></tr>
+			<tr><th>Address</th><th>Volume</th><th>Price</th></tr>
 			<center><h3 style="color: rgb(158, 241, 92);">Asks - Buy</h3></center>
 			<tr v-for="offer in asks">
 				<template v-if="offer.isMine">
@@ -82,7 +82,7 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 		<div class="col-6">
 			<center><h3 style="color: rgb(230, 17, 53);">Bids - Sell</h3></center>
 			<table style="border-collapse: collapse">
-			<tr><th>Address</th><th>Volume</th><th>Price</th></tr>
+			<tr><th>Price</th><th>Volume</th><th>Address</th></tr>
 			<tr v-for="offer in bids">
 				<template v-if="offer.isMine">
 				<td class="highlight">{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
@@ -153,11 +153,8 @@ var ripl = new Vue({
 			f1 = parseFloat(this.bids[0].TakerPays.value * 1000000/this.bids[0].TakerGets)
 			f2 = parseFloat(this.asks[0].TakerGets.value * 1000000/this.asks[0].TakerPays)
 			res = (f1 + f2) / 2;
+			res = f1
 			return res.toFixed(dec).toString();
-		},
-		
-		currentPrice_bittstamp: function(){
-			price = $.get("")
 		},
 		
 		currentFund: function() {
