@@ -35,10 +35,50 @@ input {
 	border: 1px solid black;
 	padding: 5px;
 }
-.highlight {
+
+.left-hl {
+	text-align: left;
 	background:#333;
 }
+
+.left {
+	text-align: left;
+}
+
+.left-red {
+	text-align: left;
+	color: rgb(230, 17, 53);
+}
+
+.left-hl-red {
+	text-align: left;
+	color: rgb(230, 17, 53);
+	background:#333;
+}
+
+.right-hl {
+	text-align: right;
+	background:#333;
+}
+
+.right {
+	text-align: right;
+}
+
+.right-green {
+	text-align: right;
+	color: rgb(158, 241, 92);
+}
+
+.right-hl-green {
+	text-align: right;
+	color: rgb(158, 241, 92);
+	background:#333;
+}
+
 </style>
+
+
 <script src="lib/ripple-1.2.3-min.js"></script>
 <script src="https://unpkg.com/vue@2.1.10/dist/vue.js" integrity="sha384-EM4rkSrR2j2ZpSvTwYm4oqXcfANxUbR3whO+XcSdJ7t0N7+AdqKJ9jgZZwDbPT5R" crossorigin="anonymous"></script>
 <title>RippleCharts</title>
@@ -62,39 +102,41 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 	</center>
 	<div class="row" v-bind:style="'display: ' + $data.offers_ready" v-cloak>
 	<div class="col-6">
-			<table style="border-collapse: collapse">
-			<tr><th>Address</th><th>Volume</th><th>Price</th></tr>
+			<table style="border-collapse: collapse; text-align: left">
+			<tr><th>Address</th><th>Value</th><th>Amount</th><th>Price</th></tr>
 			<center><h3 style="color: rgb(158, 241, 92);">Asks - Buy</h3></center>
-			<tr v-for="offer in asks">
+			<tr v-for="offer in asks.slice(0,50)">
 				<template v-if="offer.isMine">
-				<td class="highlight" v-bind:style="'color:' + stringToColour(offer.Account)">{{offer.Account }}</td>
-				<td class="highlight">{{ num(offer.TakerGets.value,0) }}</td>
-				<td class="highlight">{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>
+				<td class="right-hl" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)">{{ reduce(offer.Account) }}</td>
+				<td class="right-hl">{{ num(offer.TakerGets.value,0) }}</td>
+				<td class="right-hl">{{ num(offer.TakerPays / 1000000,2) }}</td>
+				<td class="right-hl-green">{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>
 				</template>
 				<template v-else>
-				<td v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)">{{offer.Account }}</td>
-				<td>{{ num(offer.TakerGets.value,0) }}</td>
-				<td>{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>	
+				<td class="right" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)">{{ reduce(offer.Account) }}</td>
+				<td class="right" >{{ num(offer.TakerGets.value,0) }}</td>
+				<td class="right" >{{ num(offer.TakerPays / 1000000,2)}}</td>
+				<td class="right-green" >{{ num2(offer.TakerGets.value * 1000000 / offer.TakerPays,5)  }}</td>
 				</template>
 			</tr>
 			</table>
 		</div>
 		<div class="col-6">
-			<center><h3 style="color: rgb(230, 17, 53);">Bids - Sell</h3></center>
 			<table style="border-collapse: collapse">
-			<tr><th>Price</th><th>Volume</th><th>Address</th></tr>
-			<tr v-for="offer in bids">
+			<tr><th>Price</th><th>Amount</th><th>Value</th><th>Address</th></tr>
+			<center><h3 style="color: rgb(230, 17, 53);">Bids - Sell</h3></center>
+			<tr v-for="offer in bids.slice(0,50)">
 				<template v-if="offer.isMine">
-				<td class="highlight">{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
-				<td class="highlight">{{ num(offer.TakerPays.value, 0) }}</td>
-				<td class="highlight" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)" >{{offer.Account}}</td>
+				<td class="left-hl-red">{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
+				<td class="left-hl">{{ num(offer.TakerGets / 1000000,2) }}</td>
+				<td class="left-hl">{{ num(offer.TakerPays.value, 0) }}</td>
+				<td class="left-hl" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)" >{{reduce(offer.Account)}}</td>	
 				</template>
 				<template v-else>
-				<td>{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
-				<td>{{ num(offer.TakerPays.value,0) }}</td>
-				<td v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)"> {{ offer.Account }}</td>
-				
-				
+				<td class="left-red" >{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
+				<td class="left" >{{ num(offer.TakerGets / 1000000,2) }}</td>
+				<td class="left" >{{ num(offer.TakerPays.value, 0) }}</td>
+				<td class="left" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)" >{{reduce(offer.Account)}}</td>	
 				</template>
 			</tr>
 			</table>
@@ -138,6 +180,11 @@ var ripl = new Vue({
 			}
 			return colour;
 		},
+		
+		reduce: function(account){
+			return account.substring(0,3)+".."+account.substring(account.length-3,account.length)
+		},
+		
 		num: function(str, decimals) {
 			var number = parseFloat(str).toFixed(decimals);
 			return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -152,8 +199,7 @@ var ripl = new Vue({
 		currentPrice: function(dec) {
 			f1 = parseFloat(this.bids[0].TakerPays.value * 1000000/this.bids[0].TakerGets)
 			f2 = parseFloat(this.asks[0].TakerGets.value * 1000000/this.asks[0].TakerPays)
-			res = (f1 + f2) / 2;
-			res = f1
+			res = f2
 			return res.toFixed(dec).toString();
 		},
 		
@@ -177,7 +223,7 @@ var ripl = new Vue({
 				ripl.bids= ripl.bookBid = null;
 				ripl.bids = offers;
 				ripl.filter_offers();
-				document.title = ripl.currentPrice(3) + "$ / "+ripl.currentFund()+"$";
+				
 			});
 			this.bookAsk = this.remote.createOrderBook({
 				currency_gets: "USD", issuer_gets:"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
@@ -188,6 +234,8 @@ var ripl = new Vue({
 				ripl.asks = offers;
 				ripl.filter_offers();
 			});
+			
+			
 		},
 		filter_offers : function(){
 			for (var i = 0; i < ripl.bids.length; i++){
