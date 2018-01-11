@@ -104,7 +104,7 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 	<div class="col-6">
 			<table style="border-collapse: collapse; text-align: left">
 			<tr><th>Address</th><th>Value</th><th>Amount</th><th>Price</th></tr>
-			<center><h3 style="color: rgb(158, 241, 92);">Asks - Buy</h3></center>
+			<center><h3 style="color: rgb(158, 241, 92);">Bids - Buy</h3></center>
 			<tr v-for="offer in asks.slice(0,50)">
 				<template v-if="offer.isMine">
 				<td class="right-hl" v-bind:style="'color:' + stringToColour(offer.Account)" v-on:click="set_address(offer.Account)">{{ reduce(offer.Account) }}</td>
@@ -124,7 +124,7 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 		<div class="col-6">
 			<table style="border-collapse: collapse">
 			<tr><th>Price</th><th>Amount</th><th>Value</th><th>Address</th></tr>
-			<center><h3 style="color: rgb(230, 17, 53);">Bids - Sell</h3></center>
+			<center><h3 style="color: rgb(230, 17, 53);">Asks - Sell</h3></center>
 			<tr v-for="offer in bids.slice(0,50)">
 				<template v-if="offer.isMine">
 				<td class="left-hl-red">{{ num2(offer.TakerPays.value * 1000000/offer.TakerGets,5) }}</td>
@@ -213,6 +213,7 @@ var ripl = new Vue({
 			return str.charAt(0).toUpperCase() + str.slice(1);
 		},
 		loadOrderBook : function(){
+			console.log('[Debug] init loadOrderBook');
 			ripl.offers_ready = 'block';
 			this.bookBid = this.remote.createOrderBook({
 				currency_gets: "XRP", issuer_gets: null,
@@ -220,6 +221,7 @@ var ripl = new Vue({
 				snapshot: true,
 			});
 			this.bookBid.on('model', function(offers) {
+				console.log('[Debug] bookbid');
 				ripl.bids= ripl.bookBid = null;
 				ripl.bids = offers;
 				ripl.filter_offers();
@@ -267,7 +269,7 @@ var ripl = new Vue({
 		},
 		getBalance : function() {
 			if (this.remote) {
-				this.account = this.remote.account(this.address)
+				this.account = this.remote.account(this.address);
 				this.account.entry();
 				this.account.on('entry', function(entry, ledger){
 					ripl.balance.xrp = parseInt(ripl.account._entry.Balance);
@@ -284,6 +286,9 @@ var ripl = new Vue({
 						}
 					);
 				});
+			}
+			else{
+				console.log('[WARNING] not connected');
 			}
 		},
 	},
@@ -303,7 +308,6 @@ var ripl = new Vue({
 	mounted: function() {
 		this.$nextTick(function () {
 			console.log('Vue loaded.');
-//			this.loadOrderBook();
 
 			this.remote = new this.Remote({
 				trusted: false,
