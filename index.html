@@ -78,6 +78,17 @@ input {
 
 </style>
 
+<script>
+var data = window.location.hash.replace(/\#/,"").split("$");
+var ADDRESS = data[0];
+var exchange_wallet = data[1];
+var exchange_pair = data.slice(2,4);
+console.log("current wallet: "+ADDRESS)
+console.log("Exchange: "+exchange_wallet)
+console.log("Pair: "+exchange_pair)
+
+</script>
+
 
 <script src="lib/ripple-1.2.3-min.js"></script>
 <script src="https://unpkg.com/vue@2.1.10/dist/vue.js" integrity="sha384-EM4rkSrR2j2ZpSvTwYm4oqXcfANxUbR3whO+XcSdJ7t0N7+AdqKJ9jgZZwDbPT5R" crossorigin="anonymous"></script>
@@ -85,21 +96,20 @@ input {
 <link rel="icon" href="favicon.ico" />
 </head>
 <body>
-<script>
-var ADDRESS = window.location.hash.replace(/\#/,"");
-</script>
+
 <div id="ripl" class="container" v-cloak>
 	<center>
 		<h4 v-on:click="getBalance()" v-bind:style="'color:' + (state == 'Online'? 'rgb(158, 241, 92)': 'rgb(230, 17, 53)')">{{ $data.state }}</h4>
 		<input type="text" v-model="address"/>
 		<br/>
-		<p><img src="img/dollar.png"></> {{ num(balance.usd, 2) }} | <img src="img/ripple.png"></> {{ num(balance.xrp/1000000, 2) }}</p>
+		<p><img class="pair1" src=""></> {{ num(balance.pair1, 2) }} | <img class="pair0" src=""></> {{ num(balance.pair0/1000000, 2) }}</p>
 		
-		<p><h3>{{ num(currentFund(), 2) }} <img src="img/dollar.png"></></h3></p>
+		<p><h3>{{ num(currentFund(), 2) }} <img class="pair1" src=""></></h3></p>
 		
-		<p><h4><img src="img/ripple.png"></> = {{ currentPrice(5) }} <img src="img/dollar.png"></></h4></p>
+		<p><h4><img class="pair0" src=""></> = {{ currentPrice(5) }} <img class="pair1" src=""></></h4></p>
 		
 	</center>
+	
 	<div class="row" v-bind:style="'display: ' + $data.offers_ready" v-cloak>
 	<div class="col-6">
 			<table style="border-collapse: collapse; text-align: left">
@@ -146,25 +156,35 @@ var ADDRESS = window.location.hash.replace(/\#/,"");
 	</div>
 </div>
 <script>
+elem = document.getElementsByClassName("pair0")
+for(var i=0 ; i < elem.length ; i++){
+	document.getElementsByClassName("pair0")[i].src = "img/"+exchange_pair[0]+".png";
+}
+
+elem = document.getElementsByClassName("pair1")
+for(var i=0 ; i < elem.length ; i++){
+	document.getElementsByClassName("pair1")[i].src = "img/"+exchange_pair[1]+".png";
+}
+
 var ripl = new Vue({
 	el: "#ripl",
 	data: {
 		state: "Offline",
 		address: ADDRESS,
-		balance: {usd: 0, xrp: 0},
+		balance: {pair1: 0, pair0: 0},
 		account: "",
 		offers_ready: "none",
 		bids: [{Account:'',TakerPays:0}],
 		asks: [{Account:'',TakerGets:{value:0},TakerPays:''}],
 		Remote: ripple.Remote,
 		ask_options: {
-        	currency_gets: "USD", issuer_gets: "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
-        	currency_pays: "XRP", // trade_currency
+        	currency_gets: exchange_pair[1], issuer_gets: exchange_wallet,
+        	currency_pays: exchange_pair[0], // trade_currency
 			// trade issuer
 		},
 		bid_options: {
-			currency_gets: "XRP", // trade_currency
-			currency_pays: "USD", issuer_pays: "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",  // bas_issuer
+			currency_gets: exchange_pair[0], // trade_currency
+			currency_pays: exchange_pair[1], issuer_pays: exchange_wallet,  // bas_issuer
 		},
 	},
 	methods: {
@@ -204,8 +224,8 @@ var ripl = new Vue({
 		},
 		
 		currentFund: function() {
-			f1 = parseFloat(this.balance.usd)
-			f2 = parseFloat(this.balance.xrp/1000000/(this.asks[0].TakerPays/this.asks[0].TakerGets.value/1000000))
+			f1 = parseFloat(this.balance.pair1)
+			f2 = parseFloat(this.balance.pair0/1000000/(this.asks[0].TakerPays/this.asks[0].TakerGets.value/1000000))
 			res = f1 + f2
 			return res.toFixed(2).toString();
 		},
@@ -216,8 +236,8 @@ var ripl = new Vue({
 			console.log('[Debug] init loadOrderBook');
 			ripl.offers_ready = 'block';
 			this.bookBid = this.remote.createOrderBook({
-				currency_gets: "XRP", issuer_gets: null,
-				currency_pays: "USD", issuer_pays:"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+				currency_gets: exchange_pair[0], issuer_gets: null,
+				currency_pays: exchange_pair[1], issuer_pays: exchange_wallet,
 				snapshot: true,
 			});
 			this.bookBid.on('model', function(offers) {
@@ -228,8 +248,8 @@ var ripl = new Vue({
 				
 			});
 			this.bookAsk = this.remote.createOrderBook({
-				currency_gets: "USD", issuer_gets:"rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
-				currency_pays: "XRP", 
+				currency_gets: exchange_pair[1], issuer_gets: exchange_wallet,
+				currency_pays: exchange_pair[0], 
 			});
 			this.bookAsk.on('model', function(offers) {
 				ripl.asks= this.bookAsks = null;
@@ -272,16 +292,16 @@ var ripl = new Vue({
 				this.account = this.remote.account(this.address);
 				this.account.entry();
 				this.account.on('entry', function(entry, ledger){
-					ripl.balance.xrp = parseInt(ripl.account._entry.Balance);
+					ripl.balance.pair0 = parseInt(ripl.account._entry.Balance);
 					ripl.remote.requestRippleBalance({
-						currency: "USD",
-						issuer: "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+						currency: exchange_pair[1],
+						issuer: exchange_wallet,
 						ledger: "validated",
 						account: ripl.address,
 						},
 						function(err, res) {
 							if (res && res.account_balance) {
-								ripl.balance.usd = res.account_balance._value
+								ripl.balance.pair1 = res.account_balance._value
 							}
 						}
 					);
